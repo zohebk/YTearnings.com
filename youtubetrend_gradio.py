@@ -7,8 +7,8 @@ import os
 import re
 
 # Replace with your own API key
-API_KEY = "AIzaSyCoOgHwlNZR4t_G43zjekVTk0VA-ujxXb8"
-
+# API_KEY = "AIzaSyCoOgHwlNZR4t_G43zjekVTk0VA-ujxXb8"
+API_KEY = os.environ.get('YOUTUBE_API_KEY')
 def build_youtube_service():
     return build("youtube", "v3", developerKey=API_KEY)
 
@@ -351,7 +351,7 @@ def app(topic, max_results, search_transcript, upload_date=None, date_operator=N
 inputs = [
     gr.inputs.Textbox(label="Topic"),
     gr.inputs.Slider(minimum=1, maximum=50, default=10, label="Max Results"),
-    gr.inputs.Checkbox(label="Search in video transcript"),
+    # gr.inputs.Checkbox(label="Search in video transcript"),
     gr.inputs.Textbox(label="Upload Date Filter (YYYY-MM-DD)"),
     gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"]),
     gr.inputs.Dropdown(label="Language", choices=["", "en", "es", "pt", "fr", "de", "it", "ru"])
@@ -364,8 +364,8 @@ iface = gr.Interface(
         gr.outputs.HTML(label="Results"),
         gr.outputs.File(label="Download CSV")
     ],
-    title="Top Trending YouTube Videos by Topic",
-    description="Enter a topic and click 'Submit' to find the top trending YouTube videos",
+    title="Top YouTube Videos, Ordered by View and Estimated Earnings",
+    description="Enter a search and click 'Submit'.Use quotes like 'Barack Obama' for search to get specific results",
     flagging=False
 )
 
