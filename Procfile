@@ -1,1 +1,1 @@
-web: gradio run --public-url 8080
+web: gradio run --public-url 80
