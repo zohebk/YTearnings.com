@@ -1,0 +1,1 @@
+web: gradio run --public-url $PORT
