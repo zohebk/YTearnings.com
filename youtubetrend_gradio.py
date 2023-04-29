@@ -366,9 +366,8 @@ iface = gr.Interface(
     ],
     title="Top YouTube Videos, Ordered by View and Estimated Earnings",
     description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results",
-    flagging=False,
-    share=True
+    flagging=False
 )
 
 
-iface.launch(inbrowser=True)
+iface.launch(inbrowser=True,share=True, server_port=8080 )
