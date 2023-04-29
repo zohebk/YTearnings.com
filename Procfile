@@ -1,1 +1,1 @@
-web: gradio run --public-url 5678
+web: gradio run --public-url $PORT
