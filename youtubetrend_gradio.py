@@ -365,7 +365,7 @@ iface = gr.Interface(
         gr.outputs.File(label="Download CSV")
     ],
     title="Top YouTube Videos, Ordered by View and Estimated Earnings",
-    description="Enter a search and click 'Submit'.Use quotes like 'Barack Obama' for search to get specific results",
+    description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results",
     flagging=False,
     share=True
 )
