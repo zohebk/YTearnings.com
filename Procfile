@@ -1,1 +1,1 @@
-web: gradio run --public-url 44444
+web: source setup.sh && python youtubetrend_gradio.py
