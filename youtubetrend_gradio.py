@@ -394,7 +394,7 @@ mobile_inputs = [
     [inputs[2]],
     [inputs[3], inputs[4]]
 ]
-if "Android" in platform.platform() or "iPhone" in platform.platform() or (platform.system() == "Linux" and platform.linux_distribution()[0]):
+if "Android" in platform.platform() or "iPhone" in platform.platform() or (platform.system() == "Linux" ):
     is_mobile = True
 else:
     is_mobile = False
