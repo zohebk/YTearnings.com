@@ -277,6 +277,36 @@ def format_metric(n):
 def format_earnings(earnings):
     return f"${earnings:.2f}"
 
+def getHtml():
+    # Define the Clarity tracking code as an environment variable
+    CLARITY_CODE = os.environ.get('CLARITY_CODE')
+
+    # Define the HTML template for the interface
+    html_template = f"""
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <title>My Gradio App</title>
+            <script type="text/javascript">
+                (function(c,l,a,r,i,t,y){{
+                    c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                }})(window, document, "clarity", "script", "{CLARITY_CODE}");
+            </script>
+        </head>
+        <body>
+            <h1>My Gradio App</h1>
+            <p>This is my app that does something useful.</p>
+            $input_section
+            <hr>
+            $output_section
+        </body>
+    </html>
+    """
+    return html_template
+
+
 def app(topic, max_results, search_transcript, upload_date=None, date_operator=None, country=None, language=None):
     if not upload_date:
         upload_date = datetime.today().strftime('%Y-%m-%d')
@@ -366,7 +396,8 @@ iface = gr.Interface(
     ],
     title="Top YouTube Videos, Ordered by View and Estimated Earnings",
     description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results",
-    flagging=False
+    flagging=False, 
+    html = getHtml()
 )
 
 
