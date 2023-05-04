@@ -7,7 +7,6 @@ import os
 import re
 import platform
 
-
 API_KEY = os.environ.get('YOUTUBE_API_KEY')
 def build_youtube_service():
     return build("youtube", "v3", developerKey=API_KEY)
@@ -389,18 +388,6 @@ inputs = [
     gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"]),
 ]
 
-mobile_inputs = [
-    [inputs[0], inputs[1]],
-    [inputs[2]],
-    [inputs[3], inputs[4]]
-]
-if "Android" in platform.platform() or "iPhone" in platform.platform() or (platform.system() == "Linux" ):
-    is_mobile = True
-else:
-    is_mobile = False
-
-if is_mobile:
-    inputs = mobile_inputs
 
 iface = gr.Interface(
     fn=app,
