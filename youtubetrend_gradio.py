@@ -5,9 +5,9 @@ import pandas as pd
 from datetime import datetime
 import os
 import re
+import platform
 
-# Replace with your own API key
-# API_KEY = "AIzaSyCoOgHwlNZR4t_G43zjekVTk0VA-ujxXb8"
+
 API_KEY = os.environ.get('YOUTUBE_API_KEY')
 def build_youtube_service():
     return build("youtube", "v3", developerKey=API_KEY)
@@ -307,12 +307,12 @@ def getHtml():
     return html_template
 
 
-def app(topic, max_results, search_transcript, upload_date=None, date_operator=None, country=None, language=None):
+def app(topic, max_results,  upload_date=None, date_operator=None, country=None, language=None):
     if not upload_date:
         upload_date = datetime.today().strftime('%Y-%m-%d')
-
+    search_transcript = None
     results = get_trending_videos(topic, max_results, search_transcript, upload_date, country, language)
-    if results is not None:
+    if results is not None and not results.empty:
         # Convert datetime.date to datetime.datetime for formatting
         if "Published At" in results:
             results["Published At"] = pd.to_datetime(results["Published At"])
@@ -335,20 +335,6 @@ def app(topic, max_results, search_transcript, upload_date=None, date_operator=N
 
         # Add Earnings column
         results["Est.Earnings"] = results.apply(lambda x: calculate_earnings(x["Views"], x["Language"], x["Niche"]), axis=1)
-
-        # # Add video statistics
-        # for i, row in results.iterrows():
-        #     video_id = row['Video URL'].split('=')[1]
-        #     video_response = service.videos().list(
-        #         part="statistics",
-        #         id=video_id,
-        #         fields="items(statistics(viewCount,likeCount,commentCount))"
-        #     ).execute()
-        #     stats = video_response["items"][0]["statistics"]
-            # row['Likes'] = int(stats.get('likeCount', 0))
-            # # row['Dislikes'] = int(stats.get('dislikeCount', 0))
-            # row['Comments'] = int(stats.get('commentCount', 0))
-
         # Format Earnings column
         results["Est.Earnings"] = results["Est.Earnings"].apply(lambda x: "${:,.1f}".format(x))
 
@@ -364,28 +350,57 @@ def app(topic, max_results, search_transcript, upload_date=None, date_operator=N
         # Make the "Video URL" column clickable
         results['Video URL'] = results['Video URL'].apply(lambda x: f'<a href="{x}" target="_blank">{x}</a>')
 
-    # Save DataFrame as CSV
+        # Save DataFrame as CSV
         csv_file = "trending_videos.csv"
         results.to_csv(csv_file, index=False)
-     # Drop Description and Niche columns
-        results = results.drop(["Description", "Niche", "Comments", "Likes", "Language","Subscribers","Dislikes"], axis=1)    
+
+        # Drop Description and Niche columns
+        results = results.drop(["Description", "Niche", "Comments", "Likes", "Language", "Subscribers", "Dislikes"], axis=1)
+        
         # Convert DataFrame to HTML table
         html_table = results.to_html(index=False, classes=["table", "table-striped", "table-bordered", "table-hover"], escape=False)
 
-        return  html_table , csv_file
+        return html_table, csv_file
+
+    elif results is not None and results.empty:
+        return "No results found. Please try different search criteria.", None
 
     else:
         return "An error occurred while fetching the data. Please try again.", None
 
 
+
 inputs = [
-    gr.inputs.Textbox(label="Topic"),
+    gr.inputs.Textbox(label="Search"),
     gr.inputs.Slider(minimum=1, maximum=50, default=10, label="Max Results"),
-    # gr.inputs.Checkbox(label="Search in video transcript"),
+    gr.inputs.Textbox(label="Upload Date Filter (YYYY-MM-DD)"),
+    gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"])
+]
+outputs=[
+        gr.outputs.HTML(label="Results"),
+        gr.outputs.File(label="Download CSV")
+    ]
+
+inputs = [
+    gr.inputs.Textbox(label="Search"),
+    gr.inputs.Slider(minimum=1, maximum=50, default=10, label="Max Results"),
+    gr.inputs.Checkbox(label="Search in video transcript"),
     gr.inputs.Textbox(label="Upload Date Filter (YYYY-MM-DD)"),
     gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"]),
-    gr.inputs.Dropdown(label="Language", choices=["", "en", "es", "pt", "fr", "de", "it", "ru"])
 ]
+
+mobile_inputs = [
+    [inputs[0], inputs[1]],
+    [inputs[2]],
+    [inputs[3], inputs[4]]
+]
+if "Android" in platform.platform() or "iPhone" in platform.platform() or (platform.system() == "Linux" and platform.linux_distribution()[0]):
+    is_mobile = True
+else:
+    is_mobile = False
+
+if is_mobile:
+    inputs = mobile_inputs
 
 iface = gr.Interface(
     fn=app,
@@ -396,9 +411,10 @@ iface = gr.Interface(
     ],
     title="Top YouTube Videos, Ordered by View and Estimated Earnings",
     description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results",
-    flagging=False, 
+    flagging=False,
+    theme="compact",
     html = getHtml()
 )
 
+iface.launch(inbrowser=True) 
 
-iface.launch(inbrowser=True )
