@@ -358,8 +358,9 @@ def app(topic, max_results,  upload_date=None, date_operator=None, country=None,
         
         # Convert DataFrame to HTML table
         html_table = results.to_html(index=False, classes=["table", "table-striped", "table-bordered", "table-hover"], escape=False)
+        responsive_table =  f'<div style="overflow-x:auto;">{html_table}</div>'
 
-        return html_table, csv_file
+        return responsive_table, csv_file
 
     elif results is not None and results.empty:
         return "No results found. Please try different search criteria.", None
@@ -383,7 +384,6 @@ outputs=[
 inputs = [
     gr.inputs.Textbox(label="Search"),
     gr.inputs.Slider(minimum=1, maximum=50, default=10, label="Max Results"),
-    gr.inputs.Checkbox(label="Search in video transcript"),
     gr.inputs.Textbox(label="Upload Date Filter (YYYY-MM-DD)"),
     gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"]),
 ]
@@ -397,7 +397,7 @@ iface = gr.Interface(
         gr.outputs.File(label="Download CSV")
     ],
     title="Top YouTube Videos, Ordered by View and Estimated Earnings",
-    description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results",
+    description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results.\n Use scroll bar at bottom of table to see all columns",
     flagging=False,
     theme="compact",
     custom_template="custom_template.html"  # Add this line to use your custom template
