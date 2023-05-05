@@ -276,34 +276,6 @@ def format_metric(n):
 def format_earnings(earnings):
     return f"${earnings:.2f}"
 
-def getHtml():
-    # Define the Clarity tracking code as an environment variable
-    CLARITY_CODE = os.environ.get('CLARITY_CODE')
-
-    # Define the HTML template for the interface
-    html_template = f"""
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>My Gradio App</title>
-            <script type="text/javascript">
-                (function(c,l,a,r,i,t,y){{
-                    c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
-                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-                }})(window, document, "clarity", "script", "{CLARITY_CODE}");
-            </script>
-        </head>
-        <body>
-            <h1>My Gradio App</h1>
-            <p>This is my app that does something useful.</p>
-            $input_section
-            <hr>
-            $output_section
-        </body>
-    </html>
-    """
-    return html_template
 
 
 def app(topic, max_results,  upload_date=None, date_operator=None, country=None, language=None):
@@ -388,6 +360,17 @@ inputs = [
     gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"]),
 ]
 
+# Read the base template
+with open("custom_template_base.html", "r") as f:
+    template_content = f.read()
+
+# Replace the placeholder with the actual Clarity project code
+clarity_project_code = os.environ.get("CLARITY_CODE")
+template_content = template_content.replace("{CLARITY_CODE}", clarity_project_code)
+
+# Save the modified template to a new file
+with open("custom_template.html", "w") as f:
+    f.write(template_content)
 
 iface = gr.Interface(
     fn=app,
