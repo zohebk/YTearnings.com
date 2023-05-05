@@ -400,8 +400,8 @@ iface = gr.Interface(
     description="Enter a search and click 'Submit'. Use quotes like 'Barack Obama' for search to get specific results",
     flagging=False,
     theme="compact",
-    html = getHtml()
+    custom_template="custom_template.html"  # Add this line to use your custom template
 )
 
-iface.launch(inbrowser=True) 
+iface.launch() 
 
