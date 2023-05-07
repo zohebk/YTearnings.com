@@ -285,18 +285,14 @@ def get_thumbnail_url(video_url):
     video_id = video_url.split("watch?v=")[-1]
     return f"https://img.youtube.com/vi/{video_id}/0.jpg"
 
-def resize_thumbnail(image, max_width=150):
-    img = Image.open(BytesIO(requests.get(image).content))
-    width, height = img.size
-    aspect_ratio = float(height) / float(width)
-    new_width = max_width
-    new_height = int(new_width * aspect_ratio)
-    img = img.resize((new_width, new_height), Image.ANTIALIAS)
-    img_bytes = BytesIO()
-    img.save(img_bytes, format='JPEG')
-    img_bytes = img_bytes.getvalue()
-    return img_bytes
 
+
+def create_video_thumbnail_html(url, max_width=500):
+    video_id = url.split('=')[-1]
+    thumbnail_url = f'https://img.youtube.com/vi/{video_id}/0.jpg'
+    thumbnail_bytes = resize_thumbnail(thumbnail_url, max_width=max_width)
+    encoded_thumbnail = base64.b64encode(thumbnail_bytes).decode("utf-8")
+    return f'<a href="{url}" target="_blank"><img src="data:image/jpeg;base64,{encoded_thumbnail}" width="{max_width}px" /></a>'
 
 
 
@@ -344,7 +340,9 @@ def app(topic, max_results,  upload_date=None, date_operator=None, country=None,
         # results['Video URL'] = results['Video URL'].apply(lambda x: f'<a href="{x}" target="_blank">{x}</a>')
         # Make the "Video URL" column show video thumbnail and make it clickable
         # Make the "Video URL" column show video thumbnail and make it clickable
-        results['Video URL'] = results['Video URL'].apply(lambda x: f'<a href="{x}" target="_blank"><img src="data:image/jpeg;base64,{base64.b64encode(resize_thumbnail(get_thumbnail_url(x))).decode()}" alt="Video thumbnail" width="100" height="56" /></a>')
+        # results['Video URL'] = results['Video URL'].apply(lambda x: f'<a href="{x}" target="_blank"><img src="data:image/jpeg;base64,{base64.b64encode(resize_thumbnail(get_thumbnail_url(x))).decode()}" alt="Video thumbnail" width="100" height="56" /></a>')
+        results['Video URL'] = results['Video URL'].apply(create_video_thumbnail_html)
+
         # Save DataFrame as CSV
         csv_file = "trending_videos.csv"
         results.to_csv(csv_file, index=False)
