@@ -301,12 +301,10 @@ def thumbnail_url(video_url, width=120, height=90):
     return thumbnail_url
 
 
-def app(topic, max_results,  upload_date=None, date_operator=None):
+def app(topic, max_results,  upload_date=None, date_operator=None, country=None, language=None):
     if not upload_date:
         upload_date = datetime.today().strftime('%Y-%m-%d')
     search_transcript = None
-    country=None
-    language=None
     results = get_trending_videos(topic, max_results, search_transcript, upload_date, country, language)
     if results is not None and not results.empty:
         # Convert datetime.date to datetime.datetime for formatting
@@ -388,7 +386,7 @@ inputs = [
     gr.inputs.Textbox(label="Upload Date Filter (YYYY-MM-DD)"),
     gr.inputs.Dropdown(label="Date Comparison Operator", choices=["", "greater_than", "less_than"]),
 ]
- 
+
 # Read the base template
 with open("custom_template_base.html", "r") as f:
     template_content = f.read()
@@ -400,58 +398,6 @@ template_content = template_content.replace("{CLARITY_CODE}", clarity_project_co
 # Save the modified template to a new file
 with open("custom_template.html", "w") as f:
     f.write(template_content)
-
-from fastapi import FastAPI, Request, Response
-from fastapi.staticfiles import StaticFiles
-
-filenames = ["js/anyadditioanlscripts.js"]
-contents = "\n".join(
-    [f"<script type='text/javascript' src='{x}'></script>" for x in filenames]
-)
-
-ga_script = """
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-CODEHERE"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-CODEHERE');
-</script>
-"""
-
-app2 = FastAPI()
-
-@app2.middleware("http")
-async def insert_js(request: Request, call_next):
-    path = request.scope["path"]  # get the request route
-    response = await call_next(request)
-
-    if path == "/":
-        response_body = ""
-        async for chunk in response.body_iterator:
-            response_body += chunk.decode()
-
-        charset_tag = '<meta charset="utf-8" />'
-        if charset_tag in response_body:
-            response_body = response_body.replace(charset_tag, charset_tag + ga_script)
-
-        response_body = response_body.replace("</body>", contents + "</body>")
-
-        del response.headers["content-length"]
-
-        return Response(
-            content=response_body,
-            status_code=response.status_code,
-            headers=dict(response.headers),
-            media_type=response.media_type,
-        )
-
-    return response
-
-app2.mount("/js", StaticFiles(directory="js"), name="js")
-
 
 iface = gr.Interface(
     fn=app,
@@ -466,8 +412,6 @@ iface = gr.Interface(
     theme="compact",
     custom_template="custom_template.html"  # Add this line to use your custom template
 )
-
-gr.mount_gradio_app(app2, iface, path="/")
 
 iface.launch() 
 
