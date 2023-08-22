@@ -1,4 +1,4 @@
-# Video 1 : 
+# YTearnings.com : 
 This code is a Python script that helps you find popular YouTube videos based on a topic you provide. It also estimates how much money each video might earn. The code uses Google's YouTube API to search for videos and Gradio, a library that helps create a web interface for the script. 
 
 Here's a simple explanation of what each part of the code does:
